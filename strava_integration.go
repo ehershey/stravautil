@@ -17,6 +17,7 @@ func ProcessNewActivities(datestring string, activity_id uint64) {
 	}
 	command_argv0 := fmt.Sprintf("%s/new_strava_activity.sh", home)
 	cmd := exec.Command(command_argv0, datestring, fmt.Sprintf("%d", activity_id))
+	cmd.Env = os.Environ()
 	log.Println("cmd:", cmd)
 	out, err := cmd.Output()
 	if err != nil {
