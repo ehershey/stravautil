@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"time"
 
@@ -37,12 +38,23 @@ const collection_name = "activities"
 const default_db_uri = "mongodb://localhost:27017"
 
 func getCollection() (*mongo.Client, *mongo.Collection, error) {
-	env_uri := os.Getenv("MONGODB_URI")
-	db_uri := default_db_uri
-	if env_uri != "" {
+	strava_env_uri := os.Getenv("STRAVA_MONGODB_URI") // prefer this
+	env_uri := os.Getenv("MONGODB_URI")               // second choice
+	db_uri := default_db_uri                          // third choice
+	if strava_env_uri != "" {
+		db_uri = strava_env_uri
+	} else if env_uri != "" {
 		db_uri = env_uri
 	}
-	client, err := mongo.NewClient(options.Client().ApplyURI(db_uri))
+	clientoptions := options.Client().ApplyURI(db_uri)
+
+	url, err := url.Parse(db_uri)
+	if err != nil {
+		log.Println("got an error:", err)
+		return nil, nil, err
+	}
+	log.Printf("connecting to mongodb at: %s\n", url.Redacted())
+	client, err := mongo.NewClient(clientoptions)
 	if err != nil {
 		log.Println("got an error:", err)
 		return nil, nil, err
