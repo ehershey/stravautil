@@ -2,7 +2,10 @@ module git.sr.ht/~ernie/stravautil
 
 go 1.21
 
-require go.mongodb.org/mongo-driver v1.14.0
+require (
+	github.com/davecgh/go-spew v1.1.1
+	go.mongodb.org/mongo-driver v1.14.0
+)
 
 require (
 	github.com/golang/snappy v0.0.4 // indirect

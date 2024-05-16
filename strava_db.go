@@ -127,6 +127,7 @@ func Delete_activity(activity_id uint64) (*Activity, error) {
 
 	return &old_activity, nil
 }
+
 func GetActivities(weeks_back int) ([]*DetailedActivity, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
