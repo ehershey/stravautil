@@ -15,10 +15,14 @@ func checkIndexes(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("Error getting collection for indexes: %w", err)
 	}
-	defer client.Disconnect(ctx)
+	defer func() {
+		if err := client.Disconnect(ctx); err != nil {
+			fmt.Printf("Error disconnecting mongo: %v\n", err)
+		}
+	}()
 
 	indexModel := mongo.IndexModel{
-		Keys:    bson.D{{"strava_id", 1}},
+		Keys:    bson.D{{Key: "strava_id", Value: 1}},
 		Options: options.Index().SetUnique(true),
 	}
 	name, err := coll.Indexes().CreateOne(ctx, indexModel)
