@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func checkIndexes(ctx context.Context) error {
+func CheckIndexes(ctx context.Context) error {
 
 	client, coll, err := getCollection()
 	if err != nil {

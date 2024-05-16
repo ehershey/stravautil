@@ -63,12 +63,12 @@ func TestCheckIndexes(t *testing.T) {
 		}
 	}()
 
-	if err := checkIndexes(ctx); err != nil {
+	if err := CheckIndexes(ctx); err != nil {
 		t.Errorf("error checking indexes: %v", err)
 	}
 
 	cursor, err := coll.Indexes().List(ctx, &options.ListIndexesOptions{})
-	if err := checkIndexes(ctx); err != nil {
+	if err := CheckIndexes(ctx); err != nil {
 		t.Errorf("error listing indexes: %v", err)
 	}
 
