@@ -3,7 +3,7 @@ package stravautil
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"reflect"
 	"strings"
 	"testing"
@@ -12,7 +12,10 @@ import (
 func TestSubUpdate(t *testing.T) {
 	str := `{"aspect_type":"delete","event_time":1604072850,"object_id":4222366652,"object_type":"activity","owner_id":3968,"subscription_id":138599,"updates":{}}`
 	res := Update{}
-	json.Unmarshal([]byte(str), &res)
+	err := json.Unmarshal([]byte(str), &res)
+	if err != nil {
+		slog.Debug("error", err)
+	}
 	verifyUpdate(res, t)
 }
 func verifyUpdate(res Update, t *testing.T) {
@@ -70,7 +73,7 @@ func TestStreamDecodeIntoObj(t *testing.T) {
 	var rawobj Update
 	err := decoder.Decode(&rawobj)
 	if err != nil {
-		log.Println(err)
+		slog.Warn("error", err)
 		t.Errorf("error decoding: %s", err)
 	}
 	verifyUpdate(rawobj, t)

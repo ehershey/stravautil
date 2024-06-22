@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/url"
 	"os"
 	"time"
@@ -53,13 +53,16 @@ func getCollection() (*mongo.Client, *mongo.Collection, error) {
 		wrappedErr := fmt.Errorf("Error parsing db_uri: %w", err)
 		return nil, nil, wrappedErr
 	}
+	slog.Debug("connecting to mongodb", "url", url.Redacted())
 	client, err := mongo.NewClient(clientoptions)
 	if err != nil {
 		wrappedErr := fmt.Errorf("Error from mongo.NewClient: %w", err)
 		return nil, nil, wrappedErr
 	}
+	slog.Debug(fmt.Sprintf("got client: %+v", client))
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+	slog.Debug("connecting")
 	err = client.Connect(ctx)
 	if err != nil {
 		wrappedErr := fmt.Errorf("Error from client.Connect: %w", err)
@@ -78,13 +81,18 @@ func Delete_activity(activity_id uint64) (*Activity, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer client.Disconnect(ctx)
+	defer func() {
+		slog.Debug("Disconnecting client")
+		if err := client.Disconnect(ctx); err != nil {
+			slog.Warn("error disconnecting client", err)
+		}
+	}()
 
 	// filter := bson.D{{Key: "strava_id", Value: activity_id}}
 	filter := bson.D{{Key: "strava_id", Value: activity_id}}
 	//filter := bson.D{}
 
-	log.Println("filter:", filter)
+	slog.Debug(fmt.Sprintf("filter: %+v", filter))
 
 	var old_activity Activity
 
@@ -98,8 +106,8 @@ func Delete_activity(activity_id uint64) (*Activity, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println("got old_activity:", old_activity)
-	log.Printf("old_activity_json: %s\n", old_activity_json)
+	slog.Debug(fmt.Sprintf("got old_activity: %+v", old_activity))
+	slog.Debug(fmt.Sprintf("old_activity_json: %s", old_activity_json))
 
 	// do the delete
 	result, err := collection.DeleteOne(ctx, filter)
@@ -107,7 +115,7 @@ func Delete_activity(activity_id uint64) (*Activity, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("DeleteOne removed %v document(s)\n", result.DeletedCount)
+	slog.Debug(fmt.Sprintf("DeleteOne removed %v document(s)\n", result.DeletedCount))
 
 	end_date_year, end_date_month, end_date_day := old_activity.End_date_local.Date()
 	end_date_string := fmt.Sprintf("%d-%02d-%02d", end_date_year, end_date_month, end_date_day)
@@ -117,14 +125,14 @@ func Delete_activity(activity_id uint64) (*Activity, error) {
 
 	// trigger processing new activities
 	//
-	log.Println("starting call goroutine for start date:", start_date_string)
+	slog.Debug("starting call goroutine for start date", "start_date_string", start_date_string)
 	go ProcessNewActivities(start_date_string, 0)
 
 	if end_date_string != start_date_string {
-		log.Println("starting call second goroutine for end date:", end_date_string)
+		slog.Debug("starting call second goroutine for end date", "end_date_string", end_date_string)
 		go ProcessNewActivities(end_date_string, 0)
 	}
-	log.Println("ending call goroutine")
+	slog.Debug("ending call goroutine")
 
 	return &old_activity, nil
 }
@@ -138,7 +146,13 @@ func GetActivities(weeks_back int) ([]*DetailedActivity, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer client.Disconnect(ctx)
+
+	defer func() {
+		slog.Debug("Disconnecting client")
+		if err := client.Disconnect(ctx); err != nil {
+			slog.Warn("error disconnecting client", err)
+		}
+	}()
 
 	minimum_timestamp := time.Now().AddDate(0, 0, int(7*-1)*int(weeks_back))
 
@@ -146,7 +160,7 @@ func GetActivities(weeks_back int) ([]*DetailedActivity, error) {
 	//filter := bson.D{{Key: "strava_id", Value: activity_id}}
 	filter := bson.M{"start_date_local": bson.M{"$gte": minimum_timestamp}}
 
-	log.Println("filter:", filter)
+	slog.Debug(fmt.Sprintf("filter: %+v", filter))
 
 	var activities []*DetailedActivity
 

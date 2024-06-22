@@ -2,7 +2,7 @@ package stravautil
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 )
 
 // {"aspect_type":"delete","event_time":1604072850,"object_id":4222366652,"object_type":"activity","owner_id":3968,"subscription_id":138599,"updates":{}}
@@ -27,7 +27,7 @@ type Update struct {
 func (update Update) String() string {
 	data, err := json.Marshal(update)
 	if err != nil {
-		log.Println("couldn't marshall json!")
+		slog.Debug("couldn't marshall json!", err)
 		return ""
 	}
 	return string(data)

@@ -3,7 +3,7 @@ package stravautil
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"testing"
 	"time"
 
@@ -19,7 +19,7 @@ func TestBasicDB(t *testing.T) {
 
 	client, collection, err := getCollection()
 	if err != nil {
-		log.Println(err)
+		slog.Debug("error", err)
 		t.Errorf("error getting db collection: %s", err)
 	}
 	defer func() {
@@ -30,18 +30,18 @@ func TestBasicDB(t *testing.T) {
 
 	filter := bson.M{}
 
-	log.Println("filter:", filter)
+	slog.Debug(fmt.Sprintf("filter: %+v", filter))
 
 	var activities []*DetailedActivity
 
 	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
-		log.Println(err)
+		slog.Debug("error", err)
 		t.Errorf("error pulling activities from db: %v", err)
 	}
 	defer cursor.Close(ctx)
 	if err = cursor.All(ctx, &activities); err != nil {
-		log.Println(err)
+		slog.Debug("error", err)
 		t.Errorf("error iterating on cursor for activities from db: %v", err)
 	}
 
@@ -54,7 +54,7 @@ func TestCheckIndexes(t *testing.T) {
 
 	client, coll, err := getCollection()
 	if err != nil {
-		log.Println(err)
+		slog.Debug("error", err)
 		t.Errorf("error getting db collection: %s", err)
 	}
 	defer func() {
@@ -68,6 +68,9 @@ func TestCheckIndexes(t *testing.T) {
 	}
 
 	cursor, err := coll.Indexes().List(ctx, &options.ListIndexesOptions{})
+	if err != nil {
+		t.Errorf("error getting cursor to list indexes: %v", err)
+	}
 	if err := CheckIndexes(ctx); err != nil {
 		t.Errorf("error listing indexes: %v", err)
 	}

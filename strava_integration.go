@@ -2,29 +2,29 @@ package stravautil
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 )
 
 func ProcessNewActivities(datestring string, activity_id uint64) {
-	log.Println("starting call sudo")
+	slog.Debug("starting call sudo")
 	home, err := os.UserHomeDir()
 	if err != nil {
 		wrappedErr := fmt.Errorf("Error getting my homedir: %v", err)
-		log.Println("got an error:", wrappedErr)
+		slog.Debug("got an error:", wrappedErr)
 		return
 	}
 	command_argv0 := fmt.Sprintf("%s/new_strava_activity.sh", home)
 	cmd := exec.Command(command_argv0, datestring, fmt.Sprintf("%d", activity_id))
 	cmd.Env = os.Environ()
-	log.Println("cmd:", cmd)
+	slog.Debug(fmt.Sprintf("cmd: %+v", cmd))
 	out, err := cmd.Output()
 	if err != nil {
-		log.Println(err)
+		slog.Debug("Error calling sudo", err)
 	} else {
-		log.Println("> new_strava_activity.sh:")
-		log.Println(string(out))
+		slog.Debug("> new_strava_activity.sh:")
+		slog.Debug(string(out))
 	}
-	log.Println("ending call sudo")
+	slog.Debug("ending call sudo")
 }
