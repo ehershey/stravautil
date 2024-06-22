@@ -50,20 +50,21 @@ func getCollection() (*mongo.Client, *mongo.Collection, error) {
 
 	url, err := url.Parse(db_uri)
 	if err != nil {
-		log.Println("got an error:", err)
-		return nil, nil, err
+		wrappedErr := fmt.Errorf("Error parsing db_uri: %w", err)
+		return nil, nil, wrappedErr
 	}
-	log.Printf("connecting to mongodb at: %s\n", url.Redacted())
 	client, err := mongo.NewClient(clientoptions)
 	if err != nil {
-		log.Println("got an error:", err)
-		return nil, nil, err
+		wrappedErr := fmt.Errorf("Error from mongo.NewClient: %w", err)
+		return nil, nil, wrappedErr
 	}
-	log.Println("got client:", client)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	log.Println("connecting")
 	err = client.Connect(ctx)
+	if err != nil {
+		wrappedErr := fmt.Errorf("Error from client.Connect: %w", err)
+		return nil, nil, wrappedErr
+	}
 	collection := client.Database(db_name).Collection(collection_name)
 	return client, collection, nil
 }
