@@ -11,7 +11,7 @@ func ProcessNewActivities(datestring string, activity_id uint64) {
 	slog.Debug("starting call sudo")
 	home, err := os.UserHomeDir()
 	if err != nil {
-		wrappedErr := fmt.Errorf("Error getting my homedir: %v", err)
+		wrappedErr := fmt.Errorf("Error getting my homedir: %w", err)
 		slog.Debug("got an error:", wrappedErr)
 		return
 	}
@@ -19,7 +19,7 @@ func ProcessNewActivities(datestring string, activity_id uint64) {
 	cmd := exec.Command(command_argv0, datestring, fmt.Sprintf("%d", activity_id))
 	cmd.Env = os.Environ()
 	slog.Debug(fmt.Sprintf("cmd: %+v", cmd))
-	out, err := cmd.Output()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
 		slog.Debug("Error calling sudo", err)
 	} else {
