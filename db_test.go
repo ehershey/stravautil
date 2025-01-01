@@ -19,7 +19,7 @@ func TestBasicDB(t *testing.T) {
 
 	client, collection, err := getCollection()
 	if err != nil {
-		slog.Debug("error", err)
+		slog.Debug("error", "err", err)
 		t.Errorf("error getting db collection: %s", err)
 	}
 	defer func() {
@@ -36,12 +36,12 @@ func TestBasicDB(t *testing.T) {
 
 	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
-		slog.Debug("error", err)
+		slog.Debug("error", "err", err)
 		t.Errorf("error pulling activities from db: %v", err)
 	}
 	defer cursor.Close(ctx)
 	if err = cursor.All(ctx, &activities); err != nil {
-		slog.Debug("error", err)
+		slog.Debug("error", "err", err)
 		t.Errorf("error iterating on cursor for activities from db: %v", err)
 	}
 
@@ -54,7 +54,7 @@ func TestCheckIndexes(t *testing.T) {
 
 	client, coll, err := getCollection()
 	if err != nil {
-		slog.Debug("error", err)
+		slog.Debug("error", "err", err)
 		t.Errorf("error getting db collection: %s", err)
 	}
 	defer func() {

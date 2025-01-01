@@ -14,7 +14,7 @@ func TestSubUpdate(t *testing.T) {
 	res := Update{}
 	err := json.Unmarshal([]byte(str), &res)
 	if err != nil {
-		slog.Debug("error", err)
+		slog.Debug("error", "err", err)
 	}
 	verifyUpdate(res, t)
 }
@@ -73,7 +73,7 @@ func TestStreamDecodeIntoObj(t *testing.T) {
 	var rawobj Update
 	err := decoder.Decode(&rawobj)
 	if err != nil {
-		slog.Warn("error", err)
+		slog.Warn("error", "err", err)
 		t.Errorf("error decoding: %s", err)
 	}
 	verifyUpdate(rawobj, t)

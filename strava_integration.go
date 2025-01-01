@@ -9,10 +9,11 @@ import (
 
 func ProcessNewActivities(datestring string, activity_id uint64) {
 	slog.Debug("starting call sudo")
+	defer slog.Debug("ending call sudo")
 	home, err := os.UserHomeDir()
 	if err != nil {
 		wrappedErr := fmt.Errorf("Error getting my homedir: %w", err)
-		slog.Debug("got an error:", wrappedErr)
+		slog.Debug("got an error:", "wrappedErr", wrappedErr)
 		return
 	}
 	command_argv0 := fmt.Sprintf("%s/new_strava_activity.sh", home)
@@ -21,10 +22,9 @@ func ProcessNewActivities(datestring string, activity_id uint64) {
 	slog.Debug(fmt.Sprintf("cmd: %+v", cmd))
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		slog.Debug("Error calling sudo", err)
+		slog.Debug("Error calling sudo", "err", err)
 	} else {
 		slog.Debug("> new_strava_activity.sh:")
 		slog.Debug(string(out))
 	}
-	slog.Debug("ending call sudo")
 }

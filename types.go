@@ -27,7 +27,7 @@ type Update struct {
 func (update Update) String() string {
 	data, err := json.Marshal(update)
 	if err != nil {
-		slog.Debug("couldn't marshall json!", err)
+		slog.Debug("couldn't marshall json!", "err", err)
 		return ""
 	}
 	return string(data)

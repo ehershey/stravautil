@@ -84,7 +84,7 @@ func Delete_activity(activity_id uint64) (*Activity, error) {
 	defer func() {
 		slog.Debug("Disconnecting client")
 		if err := client.Disconnect(ctx); err != nil {
-			slog.Warn("error disconnecting client", err)
+			slog.Warn("error disconnecting client", "err", err)
 		}
 	}()
 
@@ -150,7 +150,7 @@ func GetActivities(weeks_back int) ([]*DetailedActivity, error) {
 	defer func() {
 		slog.Debug("Disconnecting client")
 		if err := client.Disconnect(ctx); err != nil {
-			slog.Warn("error disconnecting client", err)
+			slog.Warn("error disconnecting client", "err", err)
 		}
 	}()
 
