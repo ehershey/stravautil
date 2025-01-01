@@ -60,7 +60,10 @@ func ExampleUpdate_reencode() {
 func ExampleUpdate_implicitjson() {
 	str := `{"aspect_type":"delete","event_time":1604072850,"object_id":4222366652,"object_type":"activity","owner_id":3968,"subscription_id":138599,"updates":{}}`
 	res := Update{}
-	json.Unmarshal([]byte(str), &res)
+	err := json.Unmarshal([]byte(str), &res)
+	if err != nil {
+		slog.Error("error", "err", err)
+	}
 	fmt.Println(res)
 	// Output:
 	// {"aspect_type":"delete","event_time":1604072850,"object_id":4222366652,"object_type":"activity","owner_id":3968,"subscription_id":138599,"updates":{}}
@@ -73,7 +76,7 @@ func TestStreamDecodeIntoObj(t *testing.T) {
 	var rawobj Update
 	err := decoder.Decode(&rawobj)
 	if err != nil {
-		slog.Warn("error", "err", err)
+		slog.Error("error", "err", err)
 		t.Errorf("error decoding: %s", err)
 	}
 	verifyUpdate(rawobj, t)
